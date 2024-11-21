@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>relabs-test</title>
+</head>
+<body>
+    <h1>Сообщения</h1>
+    <form id="messageForm">
+        <input type="text" id="messageInput" placeholder="Введите сообщение" required>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <ul id="messageList">
+
+    </ul>
+
+    <script>
+        const messageList = document.getElementById("messageList");
+        const messageForm = document.getElementById("messageForm");
+        const messageInput = document.getElementById("messageInput");
+
+        // Подключаемся к серверу
+        const socket = new WebSocket("ws://localhost:8000/ws");
+
+        // Обрабатываем входящие сообщения
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const listItem = document.createElement("li");
+            listItem.textContent = `${data.id}. ${data.message}`;
+            messageList.appendChild(listItem);
+        };
+
+        // Отправляем сообщение на сервер
+        messageForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const message = messageInput.value;
+            if (message) {
+                socket.send(JSON.stringify({ message: message }));
+                messageInput.value = "";
+            }
+        });
+    </script>
+</body>
+</html>
